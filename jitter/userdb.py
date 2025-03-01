@@ -1,11 +1,4 @@
-import pymongo
 from flask import request, current_app, g
-import bson
-from werkzeug.local import LocalProxy
-from flask_pymongo import PyMongo
-from pymongo.errors import DuplicateKeyError, OperationFailure
-from bson.objectid import ObjectId
-from bson.errors import InvalidId
 from dotenv import load_dotenv
 from .dbconnect import get_db
 
