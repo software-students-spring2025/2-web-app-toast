@@ -284,7 +284,7 @@ def login_post():
             flag, username = True, user_data["name"]
 
     if(flag):
-        print(username + "logged in")
+        #print(username + "logged in")
         return redirect("/profile?username=" + username)
     else:
         return redirect('/login')
@@ -313,7 +313,7 @@ def signup_post():
             print("signup successful")
         else:
             print("signup unsuccessful")
-    return redirect('/login')
+    return redirect('/')
 
 
 @app.route('/logout')
