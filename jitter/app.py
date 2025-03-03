@@ -21,6 +21,7 @@ load_dotenv()
 connection = pymongo.MongoClient(
     os.getenv("MONGO_URI")
 )
+
 db = connection["Jitter"]
 restaurants_collection = db["restaurants"]
 reviews_collection = db["reviews"]
@@ -84,12 +85,35 @@ def search():
     if "reviews" not in restaurant or not restaurant["reviews"]:
         restaurant["reviews"] = reviews
 
-    return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
+
+    return render_template("reviews.html", restaurant=restaurant, reviews=reviews)
+
+
 
 # ✅ Profile Page
 @app.route("/profile")
 def profile():
-    return render_template("profile.html")  # FIX: render_template works now!
+
+    username = "ethan"
+
+    print(f"🔍 Fetching reviews for: {username}")
+
+    reviews = list(reviews_collection.find({"username": username}).sort("created_at", -1))
+
+    if not reviews:
+        return render_template("profile.html", user={"name": username, "age": "Unknown", "location": "Unknown"}, reviews=[])
+
+    user = {
+        "name": username,
+        "age": "Unknown",
+        "location": "Unknown"
+    }
+
+    print(f"✅ Rendering profile.html with {len(reviews)} reviews")
+
+    return render_template("profile.html", user=user, reviews=reviews)
+
+
 
 
 @app.route("/add-review", methods=["GET"])

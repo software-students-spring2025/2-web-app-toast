@@ -229,8 +229,9 @@
 <body>
 <!-- Sidebar Navigation -->
 <div class="sidebar">
-    <a href="/profile.html">
-        <img src="{{ url_for('static', filename='profile-picture.png') }}" alt="User Profile">
+
+    <a href="{{ url_for('profile', username='ethan') }}" title="Profile" class="sidebar-icon">
+        <img src="/static/white-user.png" alt="User Profile" width="40" height="40">
     </a>
     <a href="/">
         <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
