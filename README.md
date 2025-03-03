@@ -8,21 +8,24 @@ David Yu[DavidYu00](https://github.com/DavidYu00) <br>
 
 ## Product vision statement
 
-Jitter is a mobile platform that empowers users to find the best restaurants/coffee shops that best match their needs. 
+Jitter is a user-review driven mobile platform that empowers users to find the best restaurants/cafes that best match their needs.
 
 ## User stories 
-* As a user, I want to view a list of restaurants and coffee shops so that I can browse available options and decide where to visit.
-* As a user, I want to read reviews left by other customers so that I can make an informed decision before visiting a coffee shop.
-* As a user, I want to be able to post reviews and rate restaurants/shops I have been to for personal and social uses.
-* As a user, I want to save resturants that I either enjoyed going to or want to go to in the future.
-* i
-* i
 
-* [View these Use Cases in an 'Issues' Section](https://github.com/software-students-spring2025/2-web-app-toast/issues)
+* [View User Stores in the 'Issues' Section](https://github.com/software-students-spring2025/2-web-app-toast/issues)
 
 ## Steps necessary to run the software
 
-See instructions. Delete this line and place instructions to download, configure, and run the software here.
+1. Clone the repository to local machine
+2. Run the app.py file under the Jitter folder. (Make sure python is in path)
+    1. Run the following command in a terminal in the project directory
+        * Depending on the machine
+            * Run python3 app.py
+            * Run python app.py
+    2. Alternatively, in VScode, use the Run Python File button when the app.py file is opened.
+3. Follow the resulting web address in terminal to see the app on computer.
+4. Use http://"serverip":5000 to view the app on your phone on the same network.
+    * Replace "serverip" with the ip of your server, most likely the local ipv4 of the computer that you ran app.py from. 
 
 ## Task boards
 
