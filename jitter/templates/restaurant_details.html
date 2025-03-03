@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ restaurant.name }} Details</title>
+    <style>
+        body {
+            background-color: white;
+            color: black;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .restaurant-details {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .reviews-container {
+            margin-top: 20px;
+        }
+
+        .review-card {
+            max-width: 800px;
+            margin: 20px auto; /* Adds spacing between review cards */
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .rating {
+            color: gold;
+        }
+
+        .review-date {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .review-buttons {
+            display: flex;
+            gap: 15px; /* Increases spacing between buttons */
+            justify-content: center; /* Centers the buttons */
+            margin-top: 15px;
+        }
+    
+        .edit-btn {
+            background-color: gray;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+    
+        .edit-btn:hover {
+            background-color: #388E3C;
+        }
+    
+        .delete-btn {
+            background-color: #ff4c4c;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+    
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ restaurant.name }}</h1>
+    <div class="restaurant-details">
+        <h2>Cuisine: {{ restaurant.cuisine or "Not specified" }}</h2>
+        <p><strong>Price:</strong> ${{ restaurant.price or "N/A" }}</p>
+        <p>{{ restaurant.description or "No description available." }}</p>
+    </div>
+
+    <div class="reviews-container">
+        <h2>Reviews</h2>
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="review-card">
+                    <h3>{{ review.user or 'Anonymous' }}</h3>
+                    <p>
+                        {% for _ in range(review.rating|int) %}⭐{% endfor %}
+                        {{ review.rating }}/5
+                    </p>
+                    <p>{{ review.comment or review.review_text }}</p>
+                    <p class="review-date">{{ review.created_at.strftime('%B %d, %Y') if review.created_at else '' }}</p>
+                
+                    <!-- Edit and Delete Buttons -->
+                    <div class="review-buttons">
+                        <a href="{{ url_for('edit_review', review_id=review._id) }}" class="edit-btn">✏️ Edit</a>
+                        <form action="{{ url_for('delete_review', review_id=review._id) }}" method="POST">
+                            <button type="submit" class="delete-btn">🗑️ Delete</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No reviews yet. Be the first to review!</p>
+        {% endif %}
+    </div>
+
+    <div class="add-review">
+        <a href="/add-review">
+            <i class="fas fa-plus-square plus-icon"></i> Add a review.
+        </a>
+    </div>
+    <br>
+    <a href="/">Back to Home</a>
+</body>
+</html>

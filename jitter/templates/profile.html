@@ -1,7 +1,86 @@
-{% extends "base.html" %}
 
-{% block content %}
-<h1 class="title">
-  Welcome, Anthony!
-</h1>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <style>
+        body {
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .profile-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .reviews-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .review-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        .nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <a href="/">🏠 Home</a> |
+        <a href="/recent-reviews">📝 Recent Reviews</a>
+    </div>
+
+    <div class="profile-container">
+        <h1>Welcome, {{ user.name }}</h1>
+
+        <h2>Your Reviews</h2>
+        {% if reviews %}
+            <ul class="reviews-list">
+                {% for review in reviews %}
+                    <li class="review-item">
+                        <h3>{{ review.restaurant_name }}</h3>
+                        <p><strong>Cuisine:</strong> {{ review.cuisine }}</p>
+                        <p><strong>Rating:</strong> ⭐️{{ review.rating }}</p>
+                        <p>{{ review.review_text }}</p>
+                        <small>Posted on {{ review.created_at.strftime('%Y-%m-%d') if review.created_at else "Unknown" }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't left any reviews yet.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>
+

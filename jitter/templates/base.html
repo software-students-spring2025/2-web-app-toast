@@ -5,46 +5,314 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Flask Auth Example</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <title>Jitter</title>
+    <style>
+        body {
+            background-color: #f8f8f8;
+        }
+
+        /* Sidebar Styling */
+/* Sidebar with improved spacing */
+.sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    height: 100% !important;
+    width: 150px !important;
+    background: #1a1a1a !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding-top: 30px !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Top navigation icons */
+  .sidebar a:nth-child(1),
+  .sidebar a:nth-child(2) {
+    margin-bottom: 40px !important; /* More space after icons */
+  }
+  
+  /* Text navigation items */
+  .sidebar a:nth-child(3),
+  .sidebar a:nth-child(4) {
+    height: 150px !important; /* Increase height to provide more vertical space */
+    margin-bottom: 20px !important;
+  }
+  
+  /* Main content adjustment */
+  .main-content {
+    margin-left: 170px !important;
+    padding: 20px !important;
+  }
+  
+  /* Icons and links */
+  .sidebar img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .sidebar a {
+    width: 100% !important;
+    text-align: center !important;
+    color: white !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* Text elements in sidebar */
+  .sidebar-text {
+    color: white !important;
+    transform: rotate(-90deg) !important;
+    white-space: nowrap !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important; /* Add letter spacing for better readability */
+  }
+
+
+        /* Search Bar */
+.search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+/* Increase Input Size */
+.search-bar input {
+    width: 60%; /* Increase width */
+    padding: 15px; /* Increase padding */
+    font-size: 18px; /* Increase font size */
+    border-radius: 25px;
+    border: 2px solid #ccc;
+}
+
+/* Increase Search Button Size */
+.search-bar button {
+    background: #d3b3d8;
+    border: none;
+    padding: 15px 20px; /* Increase padding */
+    border-radius: 50px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 18px; /* Increase button font size */
+}
+
+
+        /* Restaurant Cards */
+
+        /* Restaurant Cards Container */
+        .restaurant-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr); /* 10 cards per row */
+            gap: 15px; /* Spacing between cards */
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Individual Restaurant Card */
+        .restaurant-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .restaurant-card img {
+            width: 100%;
+            height: 120px;
+            background: #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .add-review {
+            margin-top: 30px;
+        }
+
+        .add-review a {
+            text-decoration: none;
+            font-size: 20px;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-review a:hover {
+            color: #555;
+        }
+        
+
+        .plus-icon {
+            font-size: 30px;
+            margin-right: 5px;
+        }
+
+        /* Center the container */
+        .recent-reviews {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            color: black; /* Ensures text is visible on a dark background */
+        }
+
+        /* Grid layout for reviews */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+            gap: 20px;
+            justify-content: center;
+        }
+
+        /* Review Card Styling */
+        .review-card {
+            background-color: white; /* Dark background for cards */
+            color: black;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+            text-align: left;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Rating Stars */
+        .rating {
+            font-size: 18px;
+            color: gold;
+        }
+
+        /* Date Styling */
+        .review-date {
+            font-size: 14px;
+            color: black;
+        }
+
+        /* Remove default link styling */
+        a {
+            text-decoration: none; /* Removes underline */
+            color: inherit; /* Uses the text color from parent */
+        }
+
+        /* Ensure hover effect still works */
+        a:hover {
+            color: #A94E19; /* Change to a color that matches your theme */
+            text-decoration: none;
+        }
+        /* Sidebar Icon Styling */
+        .sidebar img {
+            width: 30px;  /* Adjust icon width */
+            height: 30px; /* Adjust icon height */
+            object-fit: contain; /* Ensures icons maintain aspect ratio */
+            margin-bottom: 15px; /* Adds spacing between icons */
+        }
+        h1 {
+            text-align: center;  /* Centers the text */
+            display: block;  /* Ensures it's a block element */
+            margin: 0 auto;  /* Centers it horizontally */
+        }
+        
+
+
+
+
+    </style>
 </head>
 
 <body>
-    <section class="hero is-primary is-fullheight">
+<!-- Sidebar Navigation -->
+<div class="sidebar">
 
-        <div class="hero-head">
-            <nav class="navbar">
-                <div class="container">
-                    <div id="navbarMenuHeroA" class="navbar-menu">
-                        <div class="navbar-end">
-                            <a href="{{ url_for('main.index') }}" class="navbar-item">
-                                Home
-                            </a>
-                            <a href="{{ url_for('main.profile') }}" class="navbar-item">
-                                Profile
-                            </a>
-                            <a href="{{ url_for('auth.login') }}" class="navbar-item">
-                                Login
-                            </a>
-                            <a href="{{ url_for('auth.signup') }}" class="navbar-item">
-                                Sign Up
-                            </a>
-                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
-                                Logout
-                            </a>
-                        </div>
-                    </div>
+    <a href="{{ url_for('profile', username='ethan') }}" title="Profile" class="sidebar-icon">
+        <img src="/static/white-user.png" alt="User Profile" width="40" height="40">
+    </a>
+    <a href="/">
+        <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
+    </a>
+    <a href="/add-review">
+        <img src="{{ url_for('static', filename='add.png') }}" alt="Add New">
+    </a>
+    <a href="/login">
+        <img src="{{ url_for('static', filename='add.png') }}" alt="login">
+    </a>
+    <a href="/signup">
+        <img src="{{ url_for('static', filename='add.png') }}" alt="signup">
+    </a>
+</div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Welcome to Jitter</h1>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <form action="/search" method="GET">
+                <input type="text" name="query" placeholder="Search for a restaurant..." required>
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+
+        <!-- Restaurant List 
+        <div class="restaurant-container">
+            {% if restaurants %}
+                {% for restaurant in restaurants %}
+                <div class="restaurant-card">
+                    <h3>{{ restaurant.name }}</h3>
+                    <p><strong>${{ restaurant.price or '0' }}</strong></p>
+                    <p><em>{{ restaurant.cuisine or 'Cuisine not specified' }}</em></p>
+                    <p>{{ restaurant.description or '' }}</p>
                 </div>
-            </nav>
+                {% endfor %}
+            {% else %}
+                <p>No restaurants found.</p>
+            {% endif %}
+        </div>-->
+        <div class="restaurant-container">
+            {% if restaurants %}
+                {% for i in range(50) %}
+                <a href="{{ url_for('restaurant_details', restaurant_name=restaurants[i].name) }}" class="restaurant-card">
+                    <h3>{{ restaurants[i].name }}</h3>
+                    <p><strong>${{ restaurants[i].price or '0' }}</strong></p>
+                    <p><em>{{ restaurants[i].cuisine or 'Cuisine not specified' }}</em></p>
+                    <p>{{ restaurants[i].description or '' }}</p>
+                </a>
+                {% endfor %}
+            {% else %}
+                <p>No restaurants found.</p>
+            {% endif %}
         </div>
+        <div class="recent-reviews">
+            <h2>Recent Reviews</h2>
+            {% if recent_reviews %}
+                {% for review in recent_reviews %}
+                    <div class="review-card">
+                        <h3>{{ review.restaurant_name }}</h3>
+                        <p>Rating: {{ review.rating }}/5 
+                            {% for _ in range(review.rating) %}⭐{% endfor %}
+                        </p>
+                        <p>{{ review.review_text }}</p>
+                        <p class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No reviews yet. Be the first to review!</p>
+            {% endif %}
+        </div>
+        <!-- View Reviews and Add New -->
 
-        <div class="hero-body">
-            <div class="container has-text-centered">
-               {% block content %}
-               {% endblock %}
-            </div>
+        <div class="add-review">
+            <a href="/add-review">
+                <i class="fas fa-plus-square plus-icon"></i> or make your own.
+            </a>
         </div>
-    </section>
+    </div>
 </body>
 
 </html>

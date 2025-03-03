@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Review</title>
+    <link rel="stylesheet" href="jitter/static/styles.css">
+</head>
+<body>
+    <h1>Add a New Review</h1>
+    <form action="" method="POST">
+        <label>Name:</label>
+        <input type="text" name="user" required>
+        
+        <label>Comment:</label>
+        <textarea name="comment" required></textarea>
+
+        <label>Rating:</label>
+        <input type="number" name="rating" min="1" max="5" required>
+        
+        <button type="submit">Submit Review</button>
+    </form>
+
+    <a href="/">⬅ Back</a>
+</body>
+</html>

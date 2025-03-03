@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jitter - Recent Reviews</title>
+    <style>
+        body {
+            background-color: #f8f8f8;
+        }
+
+        /* Sidebar Styling */
+/* Sidebar with improved spacing */
+.sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    height: 100% !important;
+    width: 150px !important;
+    background: #1a1a1a !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding-top: 30px !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Top navigation icons */
+  .sidebar a:nth-child(1),
+  .sidebar a:nth-child(2) {
+    margin-bottom: 40px !important; /* More space after icons */
+  }
+  
+  /* Text navigation items */
+  .sidebar a:nth-child(3),
+  .sidebar a:nth-child(4) {
+    height: 150px !important; /* Increase height to provide more vertical space */
+    margin-bottom: 20px !important;
+  }
+  
+  /* Main content adjustment */
+  .main-content {
+    margin-left: 170px !important;
+    padding: 20px !important;
+  }
+  
+  /* Icons and links */
+  .sidebar img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .sidebar a {
+    width: 100% !important;
+    text-align: center !important;
+    color: white !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* Text elements in sidebar */
+  .sidebar-text {
+    color: white !important;
+    transform: rotate(-90deg) !important;
+    white-space: nowrap !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important; /* Add letter spacing for better readability */
+  }
+
+/* Adjust main content to accommodate larger sidebar */
+.main-content {
+    margin-left: 140px; /* Increased margin */
+    padding: 20px;
+}
+
+        /* Review Cards */
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .review-card {
+            background: white;
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .review-date {
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        .review-rating {
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+
+        .review-text {
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <a href="/profile">
+            <img src="/static/white-user.png" alt="Profile">
+        </a>
+        <a href="/">
+            <img src="/static/home-icon.png" alt="Home">
+        </a>
+        <a href="/recent-reviews">
+            <div class="sidebar-text">Recent Reviews</div>
+        </a>
+        <a href="/add-review">
+            <div class="sidebar-text">Leave a Review</div>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Recent Reviews</h1>
+
+        <div class="review-list">
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <h2>{{ review.restaurant_name }}</h2>
+                            <span class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</span>
+                        </div>
+                        
+                        <div class="review-rating">
+                            Rating: {{ review.rating }}/5
+                            {% for _ in range(review.rating|int) %}⭐{% endfor %}
+                        </div>
+                        
+                        {% if review.cuisine %}
+                        <div class="review-cuisine">
+                            Cuisine: {{ review.cuisine }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="review-text">
+                            {{ review.review_text or review.comment }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No reviews yet. Be the first to add a review!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
