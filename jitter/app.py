@@ -86,7 +86,7 @@ def search():
         restaurant["reviews"] = reviews
 
 
-    return render_template("reviews.html", restaurant=restaurant, reviews=reviews)
+    return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
 
 
 
