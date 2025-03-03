@@ -11,12 +11,15 @@ import os
 from dotenv import load_dotenv
 import pymongo
 from bson.objectid import ObjectId
+#from .userdb import insert_data, check_user
 import datetime
 
 app = Flask(__name__)
 
 # Load environment variables
 load_dotenv()
+
+#print(os.getenv("MONGO_URI"))
 
 connection = pymongo.MongoClient(
     os.getenv("MONGO_URI")
@@ -25,6 +28,7 @@ connection = pymongo.MongoClient(
 db = connection["Jitter"]
 restaurants_collection = db["restaurants"]
 reviews_collection = db["reviews"]
+users_collection = db["users"]
 
 
 # ✅ Home Route - Render the homepage
@@ -257,6 +261,68 @@ def recent_reviews():
     )
     
     return render_template("recent_reviews.html", reviews=recent_reviews)
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login_post():
+    print("in login post")
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = {
+            "email": email,
+            "password": password
+        }
+        user_data = users_collection.find_one(user)
+        print(user_data)
+        if user_data == None:
+            flag, username = False, ""
+        else:
+            flag, username = True, user_data["name"]
+
+    if(flag):
+        print(username + "logged in")
+        return redirect('/')
+    else:
+        return redirect('/login')
+
+@app.route('/signup')
+def signup():
+    print("route signup get")
+    return render_template('signup.html')
+
+@app.route('/signup', methods=['POST'])
+def signup_post():
+    #print("in signup post")
+    if request.method == 'POST':
+        print("request method post")
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        #print(name)
+        #print(email)
+        #print(password)
+
+        new_user = {}
+        new_user['name'] = name
+        new_user['email'] = email
+        new_user['password'] = password
+
+        if users_collection.find_one({"email":email}) == None:
+            users_collection.insert_one(new_user)
+            print("signup successful")
+        else:
+            print("signup unsuccessful")
+    return redirect('/login')
+
+
+@app.route('/logout')
+def logout():
+    return 'Logout'
 
 # ✅ Start Flask Application
 if __name__ == "__main__":

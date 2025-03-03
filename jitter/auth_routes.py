@@ -1,5 +1,5 @@
+'''
 from flask import Blueprint, render_template, redirect, url_for, request
-#from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from .userdb import insert_data, check_user
 
@@ -36,3 +36,5 @@ def signup_post():
 @auth.route('/logout')
 def logout():
     return 'Logout'
+
+'''

@@ -1,11 +1,5 @@
-import pymongo
+'''
 from flask import request, current_app, g
-import bson
-from werkzeug.local import LocalProxy
-from flask_pymongo import PyMongo
-from pymongo.errors import DuplicateKeyError, OperationFailure
-from bson.objectid import ObjectId
-from bson.errors import InvalidId
 from dotenv import load_dotenv
 from .dbconnect import get_db
 
@@ -78,3 +72,4 @@ def check_user():
 #             print("user found")
 #             return True, user_data["name"]
 # >>>>>>> 3e564f9eb60c1e0775d7946144205d9e9c8ca681
+'''

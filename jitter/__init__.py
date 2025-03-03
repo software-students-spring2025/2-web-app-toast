@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, abort, url_for, make_response, g
 from dotenv import load_dotenv
 from .auth import auth as auth_blueprint
-# from .main import main as main_blueprint
+from .main import main as main_blueprint
 from .dbconnect import get_db
 from .review import review as review_blueprint  
 def create_app():
