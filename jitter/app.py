@@ -303,10 +303,6 @@ def signup_post():
         email = request.form['email']
         password = request.form['password']
 
-        #print(name)
-        #print(email)
-        #print(password)
-
         new_user = {}
         new_user['name'] = name
         new_user['email'] = email
