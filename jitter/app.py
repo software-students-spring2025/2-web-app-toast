@@ -19,6 +19,8 @@ app = Flask(__name__)
 # Load environment variables
 load_dotenv()
 
+#print(os.getenv("MONGO_URI"))
+
 connection = pymongo.MongoClient(
     os.getenv("MONGO_URI")
 )
@@ -273,13 +275,25 @@ def login():
 @app.route('/login', methods=['POST'])
 def login_post():
     print("in login post")
-    [flag, username] = check_user()
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = {
+            "email": email,
+            "password": password
+        }
+        user_data = users_collection.find_one(user)
+        print(user_data)
+        if user_data == None:
+            flag, username = False, ""
+        else:
+            flag, username = True, user_data["name"]
 
     if(flag):
         print(username + "logged in")
-        return 'login success'
+        return redirect('/')
     else:
-        return redirect(url_for('auth.login'))
+        return redirect('/login')
 
 @app.route('/signup')
 def signup():
@@ -295,18 +309,21 @@ def signup_post():
         email = request.form['email']
         password = request.form['password']
 
-        reg_user = {}
-        reg_user['name'] = name
-        reg_user['email'] = email
-        reg_user['password'] = password
+        #print(name)
+        #print(email)
+        #print(password)
 
-        users = db['user']
-        if users.find_one({"email":email}) == None:
-            users.insert_one(reg_user)
-            return True
+        new_user = {}
+        new_user['name'] = name
+        new_user['email'] = email
+        new_user['password'] = password
+
+        if users_collection.find_one({"email":email}) == None:
+            users_collection.insert_one(new_user)
+            print("signup successful")
         else:
-            return False
-    return redirect(url_for('login'))
+            print("signup unsuccessful")
+    return redirect('/login')
 
 
 @app.route('/logout')
