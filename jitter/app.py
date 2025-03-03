@@ -291,7 +291,7 @@ def login_post():
 
     if(flag):
         print(username + "logged in")
-        return redirect('/')
+        return redirect("/profile?username=" + username)
     else:
         return redirect('/login')
 
