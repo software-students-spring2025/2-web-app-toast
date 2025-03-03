@@ -69,28 +69,25 @@ def add_restaurant():
 
 @app.route("/search", methods=["GET"])
 def search():
-    query = request.args.get("query")  # Get search term from the form
+    query = request.args.get("query", "").strip().lower()  # Normalize query
 
     if not query:
         return "No search term provided", 400
 
     # Find the restaurant in MongoDB (case-insensitive search)
-    restaurant = restaurants_collection.find_one(
-        {"name": {"$regex": query, "$options": "i"}}
-    )
+    restaurant = restaurants_collection.find_one({"name": query})
 
     if not restaurant:
         return "Restaurant not found", 404
 
     # Get all reviews for this restaurant
-    reviews = list(reviews_collection.find({"restaurant_name": restaurant["name"]}).sort("created_at", -1))
-    
-    # If the restaurant doesn't have its own reviews array, include the ones we just fetched
+    reviews = list(reviews_collection.find({"restaurant_name": query}).sort("created_at", -1))
+
     if "reviews" not in restaurant or not restaurant["reviews"]:
         restaurant["reviews"] = reviews
 
-
     return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
+
 
 
 
@@ -130,7 +127,7 @@ def add_review():
     if request.method == "POST":
         # Extract form data
         user = request.form.get("user")  # User's name
-        restaurant_name = request.form.get("restaurant_name")
+        restaurant_name = request.form.get("restaurant_name", "").strip().lower()  # Normalize name
         review_text = request.form.get("review_text")
         cuisine = request.form.get("cuisine", "").strip()
 
@@ -159,7 +156,7 @@ def add_review():
         # Insert review into the reviews collection
         reviews_collection.insert_one(new_review)
 
-        # Check if the restaurant exists
+        # Check if the restaurant exists (case-insensitive search)
         existing_restaurant = restaurants_collection.find_one({"name": restaurant_name})
 
         if existing_restaurant:
@@ -185,42 +182,39 @@ def add_review():
         return redirect(url_for("index"))
 
 
-
 @app.route("/restaurant/<restaurant_name>")
 def restaurant_details(restaurant_name):
-    # Find the restaurant by name
+    restaurant_name = restaurant_name.strip().lower()  # Normalize name
     restaurant = restaurants_collection.find_one({"name": restaurant_name})
 
     if not restaurant:
         return "Restaurant not found", 404
 
     # Fetch all reviews for this restaurant
-    reviews = reviews_collection.find({"restaurant_name": restaurant_name}).sort(
-        "created_at", -1
-    )
+    reviews = list(reviews_collection.find({"restaurant_name": restaurant_name}).sort("created_at", -1))
 
-    return render_template(
-        "restaurant_details.html", restaurant=restaurant, reviews=reviews
-    )
+    return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
 
 @app.route("/delete-review/<review_id>", methods=["POST"])
 def delete_review(review_id):
-    # Find the review to delete
     review = reviews_collection.find_one({"_id": ObjectId(review_id)})
 
     if not review:
         return "Review not found", 404
+
+    # Normalize restaurant name before updating
+    restaurant_name = review["restaurant_name"].strip().lower()
 
     # Delete the review from the `reviews` collection
     reviews_collection.delete_one({"_id": ObjectId(review_id)})
 
     # Remove the review from the associated restaurant's review list
     restaurants_collection.update_one(
-        {"name": review["restaurant_name"]},
+        {"name": restaurant_name},
         {"$pull": {"reviews": {"_id": ObjectId(review_id)}}}
     )
 
-    return redirect(url_for("restaurant_details", restaurant_name=review["restaurant_name"]))
+    return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
 
 @app.route("/edit-review/<review_id>")
 def edit_review(review_id):
