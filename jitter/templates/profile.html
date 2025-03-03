@@ -51,14 +51,48 @@
         .nav a:hover {
             text-decoration: underline;
         }
+        .sidebar {
+          position: fixed !important;
+          left: 0 !important;
+          top: 0 !important;
+          height: 100% !important;
+          width: 70px !important; /* Reduced width */
+          background: #1a1a1a !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          padding-top: 30px !important;
+          z-index: 1000 !important;
+      }
+      
+      /* Adjust icon sizes */
+      .sidebar img {
+          width: 25px !important;  /* Smaller icons */
+          height: 25px !important;
+      }
     </style>
 </head>
 <body>
 
-    <div class="nav">
+    <!-- <div class="nav">
         <a href="/">🏠 Home</a> |
         <a href="/recent-reviews">📝 Recent Reviews</a>
-    </div>
+    </div> -->
+
+    <div class="sidebar">
+      <a href="/profile">
+          <img src="/static/white-user.png" alt="Profile">
+      </a>
+      <a href="/">
+          <img src="/static/home-icon.png" alt="Home">
+      </a>
+      <a href="/recent-reviews">
+          <div class="sidebar-text">Recent Reviews</div>
+      </a>
+      <a href="/add-review">
+          <div class="sidebar-text">Leave a Review</div>
+      </a>
+  </div>
 
     <div class="profile-container">
         <h1>Welcome, {{ user.name }}</h1>
