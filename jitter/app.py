@@ -39,7 +39,7 @@ def index():
     )  # Fetch restaurants from MongoDB
     recent_reviews = list(reviews_collection.find().sort("created_at", -1).limit(5))
     return render_template(
-        "index.html", restaurants=restaurants, recent_reviews=recent_reviews
+        "index.html", restaurants=restaurants
     )  # FIX: render_template now works!
 
 

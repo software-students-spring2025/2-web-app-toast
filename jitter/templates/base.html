@@ -237,6 +237,10 @@
     <a href="/">
         <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
     </a>
+</a>
+<a href="/recent-reviews">
+    <img src="{{ url_for('static', filename='reviews.png') }}" alt="Recent Reviews">
+</a>
     <a href="/add-review">
         <img src="{{ url_for('static', filename='add.png') }}" alt="Add New">
     </a>
@@ -287,23 +291,6 @@
                 {% endfor %}
             {% else %}
                 <p>No restaurants found.</p>
-            {% endif %}
-        </div>
-        <div class="recent-reviews">
-            <h2>Recent Reviews</h2>
-            {% if recent_reviews %}
-                {% for review in recent_reviews %}
-                    <div class="review-card">
-                        <h3>{{ review.restaurant_name }}</h3>
-                        <p>Rating: {{ review.rating }}/5 
-                            {% for _ in range(review.rating) %}⭐{% endfor %}
-                        </p>
-                        <p>{{ review.review_text }}</p>
-                        <p class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</p>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No reviews yet. Be the first to review!</p>
             {% endif %}
         </div>
         <!-- View Reviews and Add New -->
