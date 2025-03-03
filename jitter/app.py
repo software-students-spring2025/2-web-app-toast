@@ -288,7 +288,7 @@ def signup():
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
-    print("in signup post")
+    #print("in signup post")
     if request.method == 'POST':
         print("request method post")
         name = request.form['name']
