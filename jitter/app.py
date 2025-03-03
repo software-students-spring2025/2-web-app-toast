@@ -11,6 +11,7 @@ import os
 from dotenv import load_dotenv
 import pymongo
 from bson.objectid import ObjectId
+#from .userdb import insert_data, check_user
 import datetime
 
 app = Flask(__name__)
@@ -25,6 +26,7 @@ connection = pymongo.MongoClient(
 db = connection["Jitter"]
 restaurants_collection = db["restaurants"]
 reviews_collection = db["reviews"]
+users_collection = db["users"]
 
 
 # ✅ Home Route - Render the homepage
@@ -263,6 +265,53 @@ def recent_reviews():
     )
     
     return render_template("recent_reviews.html", reviews=recent_reviews)
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login_post():
+    print("in login post")
+    [flag, username] = check_user()
+
+    if(flag):
+        print(username + "logged in")
+        return 'login success'
+    else:
+        return redirect(url_for('auth.login'))
+
+@app.route('/signup')
+def signup():
+    print("route signup get")
+    return render_template('signup.html')
+
+@app.route('/signup', methods=['POST'])
+def signup_post():
+    print("in signup post")
+    if request.method == 'POST':
+        print("request method post")
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        reg_user = {}
+        reg_user['name'] = name
+        reg_user['email'] = email
+        reg_user['password'] = password
+
+        users = db['user']
+        if users.find_one({"email":email}) == None:
+            users.insert_one(reg_user)
+            return True
+        else:
+            return False
+    return redirect(url_for('login'))
+
+
+@app.route('/logout')
+def logout():
+    return 'Logout'
 
 # ✅ Start Flask Application
 if __name__ == "__main__":
