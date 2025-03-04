@@ -48,6 +48,7 @@ def index():
         return render_template(
             "base.html", restaurants=restaurants, user=user
         )
+    return redirect(url_for("login"))
 
 
 
