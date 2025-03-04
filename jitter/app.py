@@ -31,7 +31,6 @@ reviews_collection = db["reviews"]
 users_collection = db["users"]
 
 
-# ✅ Home Route - Render the homepage
 @app.route("/")
 def index():
     # Check if the user is already logged in
@@ -52,7 +51,6 @@ def index():
 
 
 
-# ✅ API - Add a restaurant
 @app.route("/add_restaurant", methods=["POST"])
 def add_restaurant():
     data = (
@@ -121,7 +119,6 @@ def search():
     )
 
 
-# ✅ Profile Page
 @app.route("/profile")
 def profile():
     if "user" not in session:
@@ -442,6 +439,5 @@ def logout():
     return redirect('/login')  # Redirect to login page
 
 
-# ✅ Start Flask Application
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)
