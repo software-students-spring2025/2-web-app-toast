@@ -3,7 +3,6 @@
 <head>
     <title>{{ restaurant.name }} Details</title>
     <style>
-        
         body {
             background-color: white;
             color: black;
@@ -26,7 +25,7 @@
 
         .review-card {
             max-width: 800px;
-            margin: 20px auto; /* Adds spacing between review cards */
+            margin: 20px auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -46,11 +45,11 @@
 
         .review-buttons {
             display: flex;
-            gap: 15px; /* Increases spacing between buttons */
-            justify-content: center; /* Centers the buttons */
+            gap: 15px;
+            justify-content: center;
             margin-top: 15px;
         }
-    
+
         .edit-btn {
             background-color: gray;
             color: white;
@@ -61,11 +60,11 @@
             font-size: 14px;
             transition: background 0.3s ease;
         }
-    
+
         .edit-btn:hover {
             background-color: #388E3C;
         }
-    
+
         .delete-btn {
             background-color: #ff4c4c;
             color: white;
@@ -76,7 +75,7 @@
             font-size: 14px;
             transition: background 0.3s ease;
         }
-    
+
         .delete-btn:hover {
             background-color: #cc0000;
         }
@@ -102,14 +101,16 @@
                     </p>
                     <p>{{ review.comment or review.review_text }}</p>
                     <p class="review-date">{{ review.created_at.strftime('%B %d, %Y') if review.created_at else '' }}</p>
-                
-                    <!-- Edit and Delete Buttons -->
-                    <div class="review-buttons">
-                        <a href="{{ url_for('edit_review', review_id=review._id) }}" class="edit-btn">✏️ Edit</a>
-                        <form action="{{ url_for('delete_review', review_id=review._id) }}" method="POST">
-                            <button type="submit" class="delete-btn">🗑️ Delete</button>
-                        </form>
-                    </div>
+
+                    <!-- Show buttons ONLY if the logged-in user is the review's author -->
+                    {% if session["user"]["name"] == review.user %}
+                        <div class="review-buttons">
+                            <a href="{{ url_for('edit_review', review_id=review._id) }}" class="edit-btn">✏️ Edit</a>
+                            <form action="{{ url_for('delete_review', review_id=review._id) }}" method="POST">
+                                <button type="submit" class="delete-btn">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         {% else %}
@@ -118,7 +119,7 @@
     </div>
 
     <div class="add-review">
-        <a href="/add-review">
+        <a href="{{ url_for('add_review_form', restaurant_name=restaurant.name) }}">
             <i class="fas fa-plus-square plus-icon"></i> Add a review.
         </a>
     </div>

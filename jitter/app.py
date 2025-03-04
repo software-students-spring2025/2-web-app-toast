@@ -133,7 +133,8 @@ def base():
 @app.route("/add-review", methods=["GET"])
 def add_review_form():
     # Simply render the add_review.html template when users visit the page
-    return render_template("add_review.html")
+    restaurant_name = request.args.get("restaurant_name", "")
+    return render_template("add_review.html", restaurant_name=restaurant_name)
 
 
 @app.route("/add-review", methods=["POST"])
@@ -202,10 +203,12 @@ def add_review():
 
     return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
 
-
 @app.route("/restaurant/<restaurant_name>")
 def restaurant_details(restaurant_name):
-    restaurant_name = restaurant_name.strip().lower()  # Normalize name
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    restaurant_name = restaurant_name.strip().lower()
     restaurant = restaurants_collection.find_one({"name": restaurant_name})
 
     if not restaurant:
@@ -214,7 +217,13 @@ def restaurant_details(restaurant_name):
     # Fetch all reviews for this restaurant
     reviews = list(reviews_collection.find({"restaurant_name": restaurant_name}).sort("created_at", -1))
 
-    return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
+    return render_template(
+        "restaurant_details.html",
+        restaurant=restaurant,
+        reviews=reviews,
+        session=session  # Pass session to template
+    )
+
 
 @app.route("/delete-review/<review_id>", methods=["POST"])
 def delete_review(review_id):
