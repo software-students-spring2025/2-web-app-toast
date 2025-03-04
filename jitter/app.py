@@ -79,46 +79,46 @@ def add_restaurant():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("query", "").strip().lower()  # Normalize query
-    cuisine = request.args.get("cuisine", "").strip()  # Get cuisine if provided
+    cuisine = request.args.get("cuisine", "")  # Get cuisine if provided
 
     if not query:
         return "No search term provided", 400
 
-    # Find restaurants in MongoDB (case-insensitive search)
+    # Build the query filter
     search_filter = {"name": query}
     if cuisine:
         search_filter["cuisine"] = cuisine
     
-    # Find all matching restaurants
+    # Find restaurants by name (and cuisine if provided)
     restaurants = list(restaurants_collection.find(search_filter))
 
     if not restaurants:
         return "Restaurant not found", 404
     
-    # If only one restaurant found, show its details
+    # If only one restaurant found, show its details directly
     if len(restaurants) == 1:
         restaurant = restaurants[0]
         restaurant_name = restaurant["name"]
         restaurant_cuisine = restaurant.get("cuisine", "Not specified")
         
-        # Get all reviews for this restaurant
+        # Fetch reviews for this specific restaurant
         reviews = list(reviews_collection.find({
             "restaurant_name": restaurant_name,
             "cuisine": restaurant_cuisine
         }).sort("created_at", -1))
 
+        # Add reviews to restaurant object if not already there
         if "reviews" not in restaurant or not restaurant["reviews"]:
             restaurant["reviews"] = reviews
 
         return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
     
-    # If multiple restaurants found, show selection page
+    # If multiple restaurants with the same name, show the selection page
     return render_template(
         "restaurant_select.html", 
         restaurant_name=query, 
         restaurants=restaurants
     )
-
 
 
 # ✅ Profile Page
@@ -161,6 +161,7 @@ def add_review():
     restaurant_name = request.form.get("restaurant_name", "").strip().lower()
     review_text = request.form.get("review_text")
     cuisine = request.form.get("cuisine", "").strip()
+    cuisine = cuisine if cuisine else "Not specified"  # Default value if empty
 
     # Validate rating
     try:
@@ -176,7 +177,7 @@ def add_review():
     # Check if the restaurant already exists (case-insensitive search with matching cuisine)
     existing_restaurant = restaurants_collection.find_one({
         "name": restaurant_name,
-        "cuisine": cuisine if cuisine else "Not specified"
+        "cuisine": cuisine
     })
 
     # Create the review object
@@ -185,7 +186,7 @@ def add_review():
         "restaurant_name": restaurant_name,
         "rating": rating,
         "review_text": review_text,
-        "cuisine": cuisine if cuisine else "Not specified",
+        "cuisine": cuisine,
         "created_at": datetime.datetime.now(),
     }
 
@@ -198,7 +199,7 @@ def add_review():
         restaurants_collection.update_one(
             {
                 "name": restaurant_name,
-                "cuisine": cuisine if cuisine else "Not specified"
+                "cuisine": cuisine
             },
             {
                 "$push": {"reviews": new_review}
@@ -209,7 +210,7 @@ def add_review():
         new_restaurant = {
             "name": restaurant_name,
             "rating": float(rating),
-            "cuisine": cuisine if cuisine else "Not specified",
+            "cuisine": cuisine,
             "reviews": [new_review],
             "created_at": datetime.datetime.now(),
         }
@@ -221,14 +222,16 @@ def add_review():
 
     session["new_reviews"].append(new_review)  # Now safe to store
 
-    return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
+    # Include cuisine in the redirect to ensure we go to the correct restaurant
+    return redirect(url_for("restaurant_details", restaurant_name=restaurant_name, cuisine=cuisine))
+
 
 @app.route("/restaurant/<restaurant_name>")
 def restaurant_details(restaurant_name):
     restaurant_name = restaurant_name.strip().lower()  # Normalize name
     
     # Get cuisine from query parameter if available
-    cuisine = request.args.get("cuisine", None)
+    cuisine = request.args.get("cuisine")
     
     # Build query based on available information
     query = {"name": restaurant_name}
@@ -264,6 +267,19 @@ def restaurant_details(restaurant_name):
         "restaurant_name": restaurant_name,
         "cuisine": restaurant_cuisine
     }).sort("created_at", -1))
+    
+    # Calculate the average rating from reviews
+    if reviews:
+        avg_rating = sum(review["rating"] for review in reviews) / len(reviews)
+        
+        # Update the restaurant's rating with the calculated average
+        restaurants_collection.update_one(
+            {"_id": restaurant["_id"]},
+            {"$set": {"rating": avg_rating}}
+        )
+        
+        # Refresh the restaurant data to get the updated rating
+        restaurant = restaurants_collection.find_one({"_id": restaurant["_id"]})
     
     return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
 
