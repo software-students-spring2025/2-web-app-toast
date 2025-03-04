@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -54,8 +54,16 @@
 
 /* Main content adjustment - unchanged */
 .main-content {
-    margin-left: 90px !important;
+    margin-left: 90px !important; /* Keep space for the sidebar */
     padding: 20px !important;
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center content horizontally */
+    justify-content: center; /* Center content vertically if needed */
+}
+
+.main-content h1 {
+    align:center
 }
 
 /* Text elements in sidebar - unchanged */
@@ -107,11 +115,40 @@
             margin-top: 10px;
             line-height: 1.5;
         }
+        /* Edit & Delete Buttons */
+        .edit-delete-buttons {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .delete-btn {
+            background: red;
+        }
+
+        .edit-btn:hover {
+            background: #0056b3;
+        }
+
+        .delete-btn:hover {
+            background: darkred;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Sidebar Navigation -->
+    
 <div class="sidebar">
     <a href="{{ url_for('profile') }}" title="Profile" class="sidebar-icon">
         <img src="/static/white-user.png" alt="User Profile">
@@ -127,10 +164,9 @@
     </a>
 </div>
 
-    <!-- Main Content -->
+   
     <div class="main-content">
         <h1>Recent Reviews</h1>
-
         <div class="review-list">
             {% if reviews %}
                 {% for review in reviews %}
@@ -154,12 +190,238 @@
                         <div class="review-text">
                             {{ review.review_text or review.comment }}
                         </div>
+    
+                        
+                        {% if review.user == user.name %}
+                            <div class="edit-delete-buttons">
+                                <a href="{{ url_for('edit_review', review_id=review._id) }}" class="edit-btn">Edit</a>
+                                <form action="{{ url_for('delete_review', review_id=review._id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% else %}
                 <p>No reviews yet. Be the first to add a review!</p>
             {% endif %}
+
         </div>
+    </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jitter - Recent Reviews</title>
+    <style>
+        body {
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center everything */
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .review-card {
+            background: white;
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            position: relative;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .review-date {
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        .review-rating {
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+
+        .review-text {
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Edit & Delete Buttons */
+        .edit-delete-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .delete-btn {
+            background: red;
+        }
+
+        .edit-btn:hover {
+            background: #0056b3;
+        }
+
+        .delete-btn:hover {
+            background: darkred;
+        }
+        /* Sidebar with consistent spacing */
+.sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    height: 100% !important;
+    width: 70px !important; /* Maintained width */
+    background: #1a1a1a !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding-top: 30px !important;
+    z-index: 1000 !important;
+}
+
+/* Consistent icon sizes */
+.sidebar img {
+    width: 25px !important;  /* Consistent icon size */
+    height: 25px !important;
+    margin-bottom: 0 !important; /* Remove individual margins */
+}
+
+/* All navigation icons with equal spacing */
+.sidebar a {
+    width: 100% !important;
+    height: 60px !important; /* Fixed height for each link */
+    text-align: center !important;
+    color: white !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 20px !important; /* Consistent spacing between all icons */
+}
+
+/* Remove specific child selectors that create uneven spacing */
+/* These overrides are removed:
+.sidebar a:nth-child(1),
+.sidebar a:nth-child(2),
+.sidebar a:nth-child(3),
+.sidebar a:nth-child(4)
+*/
+
+/* Main content adjustment - unchanged */
+.main-content {
+    margin-left: 90px !important; /* Keep space for the sidebar */
+    padding: 20px !important;
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center content horizontally */
+    justify-content: center; /* Center content vertically if needed */
+}
+
+.main-content h1 {
+    align:center
+}
+
+/* Text elements in sidebar - unchanged */
+.sidebar-text {
+    color: white !important;
+    transform: rotate(-90deg) !important;
+    white-space: nowrap !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important;
+}
+    </style>
+</head>
+
+<body>
+    <h1>Recent Reviews</h1>
+
+    <div class="sidebar">
+        <a href="{{ url_for('profile') }}" title="Profile" class="sidebar-icon">
+            <img src="/static/white-user.png" alt="User Profile">
+        </a>
+        <a href="/" title="Home">
+            <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
+        </a>
+        <a href="/recent-reviews" title="Recent Reviews">
+            <img src="{{ url_for('static', filename='reviews.png') }}" alt="Recent Reviews">
+        </a>
+        <a href="/add-review" title="Add Review">
+            <img src="{{ url_for('static', filename='add.png') }}" alt="Add New">
+        </a>
+    </div>
+
+    <div class="review-list">
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <h2>{{ review.restaurant_name }}</h2>
+                        <span class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    
+                    <div class="review-rating">
+                        Rating: {{ review.rating }}/5
+                        {% for _ in range(review.rating|int) %}⭐{% endfor %}
+                    </div>
+                    
+                    {% if review.cuisine %}
+                    <div class="review-cuisine">
+                        Cuisine: {{ review.cuisine }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="review-text">
+                        {{ review.review_text or review.comment }}
+                    </div>
+
+                    <!-- Show edit and delete buttons only if the logged-in user wrote the review -->
+                    {% if review.user == user.name %}
+                        <div class="edit-delete-buttons">
+                            <a href="{{ url_for('edit_review', review_id=review._id) }}" class="edit-btn">Edit</a>
+                            <form action="{{ url_for('delete_review', review_id=review._id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="delete-btn">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No reviews yet. Be the first to add a review!</p>
+        {% endif %}
     </div>
 </body>
 </html>

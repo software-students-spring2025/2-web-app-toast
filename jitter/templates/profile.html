@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,55 +33,117 @@
             margin-bottom: 10px;
             border-radius: 5px;
             background: #f9f9f9;
+            position: relative;
         }
 
-        .nav {
-            text-align: center;
-            margin-bottom: 20px;
+        .edit-delete-buttons {
+            position: absolute;
+            right: 10px;
+            top: 10px;
         }
 
-        .nav a {
-            margin: 0 15px;
+        .edit-delete-buttons form {
+            display: inline;
+        }
+
+        .edit-btn, .delete-btn {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
             text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
         }
 
-        .nav a:hover {
-            text-decoration: underline;
+        .delete-btn {
+            background: red;
         }
+
+        .edit-btn:hover {
+            background: #0056b3;
+        }
+
+        .delete-btn:hover {
+            background: darkred;
+        }
+        body {
+          background-color: #f8f8f8;
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+      }
+
+      .profile-container {
+          max-width: 600px;
+          margin: auto;
+          padding: 20px;
+          text-align: center;
+          background: white;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+      }
+
+      .reviews-list {
+          list-style-type: none;
+          padding: 0;
+      }
+
+      .review-item {
+          border: 1px solid #ccc;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 5px;
+          background: #f9f9f9;
+      }
+
+      .nav {
+          text-align: center;
+          margin-bottom: 20px;
+      }
+
+      .nav a {
+          margin: 0 15px;
+          text-decoration: none;
+          color: #007BFF;
+          font-weight: bold;
+      }
+
+      .nav a:hover {
+          text-decoration: underline;
+      }
 /* Sidebar with consistent spacing */
 .sidebar {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    height: 100% !important;
-    width: 70px !important; /* Maintained width */
-    background: #1a1a1a !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    padding-top: 30px !important;
-    z-index: 1000 !important;
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 70px !important; /* Maintained width */
+  background: #1a1a1a !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding-top: 30px !important;
+  z-index: 1000 !important;
 }
 
 /* Consistent icon sizes */
 .sidebar img {
-    width: 25px !important;  /* Consistent icon size */
-    height: 25px !important;
-    margin-bottom: 0 !important; /* Remove individual margins */
+  width: 25px !important;  /* Consistent icon size */
+  height: 25px !important;
+  margin-bottom: 0 !important; /* Remove individual margins */
 }
 
 /* All navigation icons with equal spacing */
 .sidebar a {
-    width: 100% !important;
-    height: 60px !important; /* Fixed height for each link */
-    text-align: center !important;
-    color: white !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    margin-bottom: 20px !important; /* Consistent spacing between all icons */
+  width: 100% !important;
+  height: 60px !important; /* Fixed height for each link */
+  text-align: center !important;
+  color: white !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-bottom: 20px !important; /* Consistent spacing between all icons */
 }
 
 /* Remove specific child selectors that create uneven spacing */
@@ -95,30 +156,24 @@
 
 /* Main content adjustment - unchanged */
 .main-content {
-    margin-left: 90px !important;
-    padding: 20px !important;
+  margin-left: 90px !important;
+  padding: 20px !important;
 }
 
 /* Text elements in sidebar - unchanged */
 .sidebar-text {
-    color: white !important;
-    transform: rotate(-90deg) !important;
-    white-space: nowrap !important;
-    font-size: 18px !important;
-    font-weight: bold !important;
-    letter-spacing: 1px !important;
+  color: white !important;
+  transform: rotate(-90deg) !important;
+  white-space: nowrap !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
 }
     </style>
 </head>
 <body>
 
-    <!-- <div class="nav">
-        <a href="/">🏠 Home</a> |
-        <a href="/recent-reviews">📝 Recent Reviews</a>
-    </div> -->
-
-    <!-- Sidebar Navigation -->
-<div class="sidebar">
+  <div class="sidebar">
     <a href="{{ url_for('profile') }}" title="Profile" class="sidebar-icon">
         <img src="/static/white-user.png" alt="User Profile">
     </a>
@@ -133,30 +188,38 @@
     </a>
 </div>
 
-  <div class="profile-container">
-    <h1>Welcome, {{ user.name }}</h1>
+    <div class="profile-container">
+        <h1>Welcome, {{ user.name }}</h1>
 
-    <h2>Your Reviews</h2>
-    {% if reviews %}
-        <ul class="reviews-list">
-            {% for review in reviews %}
-                <li class="review-item">
-                    <h3>{{ review.restaurant_name }}</h3>
-                    <p><strong>Cuisine:</strong> {{ review.cuisine }}</p>
-                    <p><strong>Rating:</strong> ⭐️{{ review.rating }}</p>
-                    <p>{{ review.review_text }}</p>
-                    <small>Posted on {{ review.created_at.strftime('%Y-%m-%d') if review.created_at else "Unknown" }}</small>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You haven't left any reviews yet.</p>
-    {% endif %}
-    
-    <br>
-    <a href="/logout">Logout</a> <!-- Add a logout link -->
-</div>
+        <h2>Your Reviews</h2>
+        {% if reviews %}
+            <ul class="reviews-list">
+                {% for review in reviews %}
+                    <li class="review-item">
+                        <h3>{{ review.restaurant_name }}</h3>
+                        <p><strong>Cuisine:</strong> {{ review.cuisine }}</p>
+                        <p><strong>Rating:</strong> ⭐️{{ review.rating }}</p>
+                        <p>{{ review.review_text }}</p>
+                        <small>Posted on {{ review.created_at.strftime('%Y-%m-%d') if review.created_at else "Unknown" }}</small>
+
+                        {% if review.user == user.name %}
+                            <div class="edit-delete-buttons">
+                                <a href="{{ url_for('edit_review', review_id=review._id) }}" class="edit-btn">Edit</a>
+                                <form action="{{ url_for('delete_review', review_id=review._id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't left any reviews yet.</p>
+        {% endif %}
+        
+        <br>
+        <a href="/logout">Logout</a>
+    </div>
 
 </body>
 </html>
-

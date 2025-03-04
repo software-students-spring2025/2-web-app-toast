@@ -136,7 +136,10 @@ def profile():
     session_reviews = session.get("new_reviews", [])
 
     # Combine session-stored reviews with database-stored reviews
-    all_reviews = session_reviews + db_reviews
+    all_reviews = db_reviews.copy()
+    for review in session_reviews:
+        if review not in all_reviews:
+            all_reviews.append(review)
 
     return render_template("profile.html", user=session["user"], reviews=all_reviews)
 
@@ -149,7 +152,8 @@ def base():
 @app.route("/add-review", methods=["GET"])
 def add_review_form():
     # Simply render the add_review.html template when users visit the page
-    return render_template("add_review.html")
+    restaurant_name = request.args.get("restaurant_name", "")  # Get restaurant name from query params
+    return render_template("add_review.html", restaurant_name=restaurant_name)
 
 
 @app.route("/add-review", methods=["POST"])
@@ -285,10 +289,17 @@ def restaurant_details(restaurant_name):
 
 @app.route("/delete-review/<review_id>", methods=["POST"])
 def delete_review(review_id):
+    if "user" not in session:
+        return redirect("/login")  # Ensure user is logged in
+
     review = reviews_collection.find_one({"_id": ObjectId(review_id)})
 
     if not review:
         return "Review not found", 404
+
+    # Ensure only the owner can delete their review
+    if review["user"] != session["user"]["name"]:
+        return "Unauthorized action", 403
 
     # Normalize restaurant name before updating
     restaurant_name = review["restaurant_name"].strip().lower()
@@ -302,15 +313,22 @@ def delete_review(review_id):
         {"$pull": {"reviews": {"_id": ObjectId(review_id)}}}
     )
 
-    return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
+    return redirect(url_for("profile"))
 
 @app.route("/edit-review/<review_id>")
 def edit_review(review_id):
     """Render the edit review page."""
+    if "user" not in session:
+        return redirect("/login")  # Ensure user is logged in
+
     review = reviews_collection.find_one({"_id": ObjectId(review_id)})
 
     if not review:
         return "Review not found", 404
+
+    # Ensure only the owner can edit their review
+    if review["user"] != session["user"]["name"]:
+        return "Unauthorized action", 403
 
     return render_template("edit_review.html", review=review)
 
@@ -318,6 +336,18 @@ def edit_review(review_id):
 @app.route("/update-review/<review_id>", methods=["POST"])
 def update_review(review_id):
     """Update the review in the database."""
+    if "user" not in session:
+        return redirect("/login")  # Ensure user is logged in
+
+    review = reviews_collection.find_one({"_id": ObjectId(review_id)})
+
+    if not review:
+        return "Review not found", 404
+
+    # Ensure only the owner can update their review
+    if review["user"] != session["user"]["name"]:
+        return "Unauthorized action", 403
+
     new_rating = int(request.form.get("rating"))
     new_review_text = request.form.get("review_text")
 
@@ -328,7 +358,6 @@ def update_review(review_id):
     )
 
     # Find the restaurant associated with this review
-    review = reviews_collection.find_one({"_id": ObjectId(review_id)})
     restaurant_name = review["restaurant_name"]
 
     # Update the review inside the restaurant's reviews list
@@ -337,18 +366,22 @@ def update_review(review_id):
         {"$set": {"reviews.$.rating": new_rating, "reviews.$.review_text": new_review_text}}
     )
 
-    return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
+    return redirect(url_for("profile"))
 
 
-    
+
 @app.route("/recent-reviews")
 def recent_reviews():
-    # Fetch the most recent reviews from your database
-    recent_reviews = list(
-        reviews_collection.find().sort("created_at", -1).limit(10)
-    )
-    
-    return render_template("recent_reviews.html", reviews=recent_reviews)
+    if "user" not in session:
+        return redirect("/login")  # Ensure the user is logged in
+
+    user = session["user"]  # Get the logged-in user info
+
+    # Fetch the most recent reviews from the database
+    recent_reviews = list(reviews_collection.find().sort("created_at", -1).limit(5))
+
+    return render_template("recent_reviews.html", reviews=recent_reviews, user=user)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
