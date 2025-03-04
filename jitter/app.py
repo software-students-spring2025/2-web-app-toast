@@ -278,12 +278,8 @@ def recent_reviews():
     
     return render_template("recent_reviews.html", reviews=recent_reviews)
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
-
-@app.route('/login', methods=['POST'])
-def login_post():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -292,16 +288,21 @@ def login_post():
         user_data = users_collection.find_one({"email": email, "password": password})
 
         if user_data is None:
-            return redirect('/login')  # Redirect back to login on failure
+            # Add a message to inform the user about invalid credentials
+            error_message = "Invalid email or password. Please try again."
+            return render_template('login.html', error=error_message)
         
         # Store user information in session
         session['user'] = {
-            "name": user_data["name"],  # Store the name of the user
+            "name": user_data["name"],
             "email": user_data["email"]
         }
 
-        return redirect('/profile')  # Redirect to the profile page
-
+        # Redirect to the home page after successful login
+        return redirect('/')
+    
+    # For GET requests, just render the login template
+    return render_template('login.html')
 
 @app.route('/signup')
 def signup():
