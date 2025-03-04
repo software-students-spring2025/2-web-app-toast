@@ -33,8 +33,6 @@ users_collection = db["users"]
 
 @app.route("/")
 def index():
-    # Check if the user is already logged in
-
     # If the user is NOT logged in, fetch restaurant data and show login page
     restaurants = list(
         restaurants_collection.find({}, {"_id": 0})
