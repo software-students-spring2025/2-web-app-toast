@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Restaurant - {{ restaurant_name }}</title>
+    <style>
+        body {
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        .restaurant-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .restaurant-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .restaurant-card:hover {
+            background: #f0f0f0;
+        }
+
+        .restaurant-info {
+            flex: 1;
+        }
+
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: #388E3C;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multiple restaurants found with name "{{ restaurant_name }}"</h1>
+        <h2>Please select the specific restaurant:</h2>
+        
+        <div class="restaurant-options">
+            {% for restaurant in restaurants %}
+            <div class="restaurant-card">
+                <div class="restaurant-info">
+                    <h3>{{ restaurant.name|title }}</h3>
+                    <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+                    {% if restaurant.rating %}
+                    <p><strong>Rating:</strong> {{ restaurant.rating }}/5</p>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('restaurant_details', restaurant_name=restaurant.name, cuisine=restaurant.cuisine) }}" class="button">
+                    View Restaurant
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

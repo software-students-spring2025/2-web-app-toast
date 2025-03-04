@@ -79,24 +79,45 @@ def add_restaurant():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("query", "").strip().lower()  # Normalize query
+    cuisine = request.args.get("cuisine", "").strip()  # Get cuisine if provided
 
     if not query:
         return "No search term provided", 400
 
-    # Find the restaurant in MongoDB (case-insensitive search)
-    restaurant = restaurants_collection.find_one({"name": query})
+    # Find restaurants in MongoDB (case-insensitive search)
+    search_filter = {"name": query}
+    if cuisine:
+        search_filter["cuisine"] = cuisine
+    
+    # Find all matching restaurants
+    restaurants = list(restaurants_collection.find(search_filter))
 
-    if not restaurant:
+    if not restaurants:
         return "Restaurant not found", 404
+    
+    # If only one restaurant found, show its details
+    if len(restaurants) == 1:
+        restaurant = restaurants[0]
+        restaurant_name = restaurant["name"]
+        restaurant_cuisine = restaurant.get("cuisine", "Not specified")
+        
+        # Get all reviews for this restaurant
+        reviews = list(reviews_collection.find({
+            "restaurant_name": restaurant_name,
+            "cuisine": restaurant_cuisine
+        }).sort("created_at", -1))
 
-    # Get all reviews for this restaurant
-    reviews = list(reviews_collection.find({"restaurant_name": query}).sort("created_at", -1))
+        if "reviews" not in restaurant or not restaurant["reviews"]:
+            restaurant["reviews"] = reviews
 
-    if "reviews" not in restaurant or not restaurant["reviews"]:
-        restaurant["reviews"] = reviews
-
-    return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
-
+        return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
+    
+    # If multiple restaurants found, show selection page
+    return render_template(
+        "restaurant_select.html", 
+        restaurant_name=query, 
+        restaurants=restaurants
+    )
 
 
 
@@ -152,8 +173,11 @@ def add_review():
     if not restaurant_name or not review_text:
         return "Please provide both a restaurant name and your review", 400
 
-    # Check if the restaurant already exists (case-insensitive search)
-    existing_restaurant = restaurants_collection.find_one({"name": restaurant_name})
+    # Check if the restaurant already exists (case-insensitive search with matching cuisine)
+    existing_restaurant = restaurants_collection.find_one({
+        "name": restaurant_name,
+        "cuisine": cuisine if cuisine else "Not specified"
+    })
 
     # Create the review object
     new_review = {
@@ -161,7 +185,7 @@ def add_review():
         "restaurant_name": restaurant_name,
         "rating": rating,
         "review_text": review_text,
-        "cuisine": cuisine if cuisine else None,
+        "cuisine": cuisine if cuisine else "Not specified",
         "created_at": datetime.datetime.now(),
     }
 
@@ -172,10 +196,12 @@ def add_review():
     if existing_restaurant:
         # Append the new review to the existing restaurant
         restaurants_collection.update_one(
-            {"name": restaurant_name},
             {
-                "$push": {"reviews": new_review},
-                "$set": {"cuisine": cuisine} if cuisine else {}
+                "name": restaurant_name,
+                "cuisine": cuisine if cuisine else "Not specified"
+            },
+            {
+                "$push": {"reviews": new_review}
             }
         )
     else:
@@ -197,18 +223,48 @@ def add_review():
 
     return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
 
-
 @app.route("/restaurant/<restaurant_name>")
 def restaurant_details(restaurant_name):
     restaurant_name = restaurant_name.strip().lower()  # Normalize name
-    restaurant = restaurants_collection.find_one({"name": restaurant_name})
-
+    
+    # Get cuisine from query parameter if available
+    cuisine = request.args.get("cuisine", None)
+    
+    # Build query based on available information
+    query = {"name": restaurant_name}
+    if cuisine:
+        query["cuisine"] = cuisine
+    
+    # Find restaurant based on name and cuisine if provided
+    restaurant = restaurants_collection.find_one(query)
+    
     if not restaurant:
-        return "Restaurant not found", 404
-
-    # Fetch all reviews for this restaurant
-    reviews = list(reviews_collection.find({"restaurant_name": restaurant_name}).sort("created_at", -1))
-
+        # If no exact match, check if multiple restaurants with the same name exist
+        restaurants_with_name = list(restaurants_collection.find({"name": restaurant_name}))
+        
+        if not restaurants_with_name:
+            return "Restaurant not found", 404
+        
+        # If only one result despite not matching cuisine, use that one
+        if len(restaurants_with_name) == 1:
+            restaurant = restaurants_with_name[0]
+        elif len(restaurants_with_name) > 1:
+            # If multiple restaurants with same name, show selection page
+            return render_template(
+                "restaurant_select.html", 
+                restaurant_name=restaurant_name, 
+                restaurants=restaurants_with_name
+            )
+    
+    # Get the cuisine from the selected restaurant
+    restaurant_cuisine = restaurant.get("cuisine", "Not specified")
+    
+    # Fetch all reviews for this restaurant with matching cuisine
+    reviews = list(reviews_collection.find({
+        "restaurant_name": restaurant_name,
+        "cuisine": restaurant_cuisine
+    }).sort("created_at", -1))
+    
     return render_template("restaurant_details.html", restaurant=restaurant, reviews=reviews)
 
 @app.route("/delete-review/<review_id>", methods=["POST"])
