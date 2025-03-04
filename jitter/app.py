@@ -129,6 +129,7 @@ def add_review_form():
     # Simply render the add_review.html template when users visit the page
     return render_template("add_review.html")
 
+
 @app.route("/add-review", methods=["POST"])
 def add_review():
     if "user" not in session:
@@ -150,7 +151,10 @@ def add_review():
     if not restaurant_name or not review_text:
         return "Please provide both a restaurant name and your review", 400
 
-    # Create review object
+    # Check if the restaurant already exists (case-insensitive search)
+    existing_restaurant = restaurants_collection.find_one({"name": restaurant_name})
+
+    # Create the review object
     new_review = {
         "user": user,
         "restaurant_name": restaurant_name,
@@ -164,15 +168,33 @@ def add_review():
     inserted_review = reviews_collection.insert_one(new_review)
     new_review["_id"] = str(inserted_review.inserted_id)  # Convert ObjectId to string
 
+    if existing_restaurant:
+        # Append the new review to the existing restaurant
+        restaurants_collection.update_one(
+            {"name": restaurant_name},
+            {
+                "$push": {"reviews": new_review},
+                "$set": {"cuisine": cuisine} if cuisine else {}
+            }
+        )
+    else:
+        # Create new restaurant entry with initial review
+        new_restaurant = {
+            "name": restaurant_name,
+            "rating": float(rating),
+            "cuisine": cuisine if cuisine else "Not specified",
+            "reviews": [new_review],
+            "created_at": datetime.datetime.now(),
+        }
+        restaurants_collection.insert_one(new_restaurant)
+
     # Store the new review in session
     if "new_reviews" not in session:
         session["new_reviews"] = []
-    
+
     session["new_reviews"].append(new_review)  # Now safe to store
 
-    return redirect(url_for("profile"))
-
-
+    return redirect(url_for("restaurant_details", restaurant_name=restaurant_name))
 
 
 @app.route("/restaurant/<restaurant_name>")
