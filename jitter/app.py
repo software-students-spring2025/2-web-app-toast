@@ -115,7 +115,12 @@ def profile():
     session_reviews = session.get("new_reviews", [])
 
     # Combine session-stored reviews with database-stored reviews
-    all_reviews = session_reviews + db_reviews
+    # Ensure no duplicates by adding only unique reviews
+    all_reviews = db_reviews.copy()
+    for review in session_reviews:
+        if review not in all_reviews:
+            all_reviews.append(review)
+
 
     return render_template("profile.html", user=session["user"], reviews=all_reviews)
 
