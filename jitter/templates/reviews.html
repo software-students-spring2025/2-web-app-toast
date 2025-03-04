@@ -42,13 +42,13 @@
             font-size: 14px;
             color: #555;
         }
-        /* Sidebar with improved spacing */
+/* Sidebar with consistent spacing */
 .sidebar {
     position: fixed !important;
     left: 0 !important;
     top: 0 !important;
     height: 100% !important;
-    width: 70px !important; /* Reduced width */
+    width: 70px !important; /* Maintained width */
     background: #1a1a1a !important;
     display: flex !important;
     flex-direction: column !important;
@@ -57,77 +57,66 @@
     z-index: 1000 !important;
 }
 
-/* Adjust icon sizes */
+/* Consistent icon sizes */
 .sidebar img {
-    width: 25px !important;  /* Smaller icons */
+    width: 25px !important;  /* Consistent icon size */
     height: 25px !important;
+    margin-bottom: 0 !important; /* Remove individual margins */
 }
-  
-  /* Top navigation icons */
-  .sidebar a:nth-child(1),
-  .sidebar a:nth-child(2) {
-    margin-bottom: 40px !important; /* More space after icons */
-  }
-  
-  /* Text navigation items */
-  .sidebar a:nth-child(3),
-  .sidebar a:nth-child(4) {
-    height: 150px !important; /* Increase height to provide more vertical space */
-    margin-bottom: 20px !important;
-  }
-  
-  /* Main content adjustment */
-  .main-content {
-    margin-left: 90px !important;
-    padding: 20px !important;
-  }
-  
-  /* Icons and links */
-  .sidebar a {
+
+/* All navigation icons with equal spacing */
+.sidebar a {
     width: 100% !important;
+    height: 60px !important; /* Fixed height for each link */
     text-align: center !important;
     color: white !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-  }
-  
-  /* Text elements in sidebar */
-  .sidebar-text {
+    margin-bottom: 20px !important; /* Consistent spacing between all icons */
+}
+
+/* Remove specific child selectors that create uneven spacing */
+/* These overrides are removed:
+.sidebar a:nth-child(1),
+.sidebar a:nth-child(2),
+.sidebar a:nth-child(3),
+.sidebar a:nth-child(4)
+*/
+
+/* Main content adjustment - unchanged */
+.main-content {
+    margin-left: 90px !important;
+    padding: 20px !important;
+}
+
+/* Text elements in sidebar - unchanged */
+.sidebar-text {
     color: white !important;
     transform: rotate(-90deg) !important;
     white-space: nowrap !important;
     font-size: 18px !important;
     font-weight: bold !important;
-    letter-spacing: 1px !important; /* Add letter spacing for better readability */
-  }
-        /* Sidebar Icon Styling */
-        .sidebar img {
-            width: 30px;  /* Adjust icon width */
-            height: 30px; /* Adjust icon height */
-            object-fit: contain; /* Ensures icons maintain aspect ratio */
-            margin-bottom: 15px; /* Adds spacing between icons */
-        }
+    letter-spacing: 1px !important;
+}
     </style>
 </head>
 <body>
         <!-- Sidebar Navigation -->
-        <div class="sidebar">
-
-            <a href="{{ url_for('profile', username='ethan') }}" title="Profile" class="sidebar-icon">
-                <img src="/static/white-user.png" alt="User Profile" width="40" height="40">
-            </a>
-            <a href="/">
-                <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
-            </a>
-        </a>
-        <a href="/recent-reviews">
-            <img src="{{ url_for('static', filename='reviews.png') }}" alt="Recent Reviews">
-        </a>
-            <a href="/add-review">
-                <img src="{{ url_for('static', filename='add.png') }}" alt="Add New">
-            </a>
-        </div>
+<div class="sidebar">
+    <a href="{{ url_for('profile') }}" title="Profile" class="sidebar-icon">
+        <img src="/static/white-user.png" alt="User Profile">
+    </a>
+    <a href="/" title="Home">
+        <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
+    </a>
+    <a href="/recent-reviews" title="Recent Reviews">
+        <img src="{{ url_for('static', filename='reviews.png') }}" alt="Recent Reviews">
+    </a>
+    <a href="/add-review" title="Add Review">
+        <img src="{{ url_for('static', filename='add.png') }}" alt="Add New">
+    </a>
+</div>
 
     <h1>{{ restaurant.name }}</h1>
     <div class="restaurant-details">
