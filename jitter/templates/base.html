@@ -244,17 +244,11 @@
     <a href="/add-review">
         <img src="{{ url_for('static', filename='add.png') }}" alt="Add New">
     </a>
-    <a href="/login">
-        Login
-    </a>
-    <a href="/signup">
-        Signup
-    </a>
 </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <h1>Welcome to Jitter</h1>
+        <h1>Welcome to Jitter, {{ user.name }}</h1>
 
         <!-- Search Bar -->
         <div class="search-bar">
@@ -297,7 +291,7 @@
 
         <div class="add-review">
             <a href="/add-review">
-                <i class="fas fa-plus-square plus-icon"></i> or make your own.
+                <i class="fas fa-plus-square plus-icon"></i> or add a new review.
             </a>
         </div>
     </div>

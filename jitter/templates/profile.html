@@ -84,7 +84,7 @@
           <img src="/static/white-user.png" alt="Profile">
       </a>
       <a href="/">
-          <img src="/static/home-icon.png" alt="Home">
+          <img src="{{ url_for('static', filename='building.png') }}" alt="Home">
       </a>
       <a href="/recent-reviews">
           <div class="sidebar-text">Recent Reviews</div>
@@ -94,26 +94,29 @@
       </a>
   </div>
 
-    <div class="profile-container">
-        <h1>Welcome, {{ user.name }}</h1>
+  <div class="profile-container">
+    <h1>Welcome, {{ user.name }}</h1>
 
-        <h2>Your Reviews</h2>
-        {% if reviews %}
-            <ul class="reviews-list">
-                {% for review in reviews %}
-                    <li class="review-item">
-                        <h3>{{ review.restaurant_name }}</h3>
-                        <p><strong>Cuisine:</strong> {{ review.cuisine }}</p>
-                        <p><strong>Rating:</strong> ⭐️{{ review.rating }}</p>
-                        <p>{{ review.review_text }}</p>
-                        <small>Posted on {{ review.created_at.strftime('%Y-%m-%d') if review.created_at else "Unknown" }}</small>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>You haven't left any reviews yet.</p>
-        {% endif %}
-    </div>
+    <h2>Your Reviews</h2>
+    {% if reviews %}
+        <ul class="reviews-list">
+            {% for review in reviews %}
+                <li class="review-item">
+                    <h3>{{ review.restaurant_name }}</h3>
+                    <p><strong>Cuisine:</strong> {{ review.cuisine }}</p>
+                    <p><strong>Rating:</strong> ⭐️{{ review.rating }}</p>
+                    <p>{{ review.review_text }}</p>
+                    <small>Posted on {{ review.created_at.strftime('%Y-%m-%d') if review.created_at else "Unknown" }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't left any reviews yet.</p>
+    {% endif %}
+    
+    <br>
+    <a href="/logout">Logout</a> <!-- Add a logout link -->
+</div>
 
 </body>
 </html>

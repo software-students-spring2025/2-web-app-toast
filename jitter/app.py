@@ -13,13 +13,13 @@ import pymongo
 from bson.objectid import ObjectId
 #from .userdb import insert_data, check_user
 import datetime
+from flask import session
 
-app = Flask(__name__)
-
-# Load environment variables
 load_dotenv()
 
-#print(os.getenv("MONGO_URI"))
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
+
 
 connection = pymongo.MongoClient(
     os.getenv("MONGO_URI")
@@ -34,13 +34,21 @@ users_collection = db["users"]
 # ✅ Home Route - Render the homepage
 @app.route("/")
 def index():
+    # Check if the user is already logged in
+
+    # If the user is NOT logged in, fetch restaurant data and show login page
     restaurants = list(
         restaurants_collection.find({}, {"_id": 0})
     )  # Fetch restaurants from MongoDB
+    user = session.get("user", None)   # Debugging print
+
     recent_reviews = list(reviews_collection.find().sort("created_at", -1).limit(5))
-    return render_template(
-        "index.html", restaurants=restaurants
-    )  # FIX: render_template now works!
+    if "user" in session:
+        #return redirect(url_for("profile"))  # Redirect to profile if logged in
+        return render_template(
+            "base.html", restaurants=restaurants, user=user
+        )
+
 
 
 # ✅ API - Add a restaurant
@@ -94,27 +102,26 @@ def search():
 # ✅ Profile Page
 @app.route("/profile")
 def profile():
+    if "user" not in session:
+        return redirect("/login")
 
-    username = "ethan"
+    username = session["user"]["name"]
 
-    print(f"🔍 Fetching reviews for: {username}")
+    # Fetch reviews from the database
+    db_reviews = list(reviews_collection.find({"user": username}).sort("created_at", -1))
 
-    reviews = list(reviews_collection.find({"username": username}).sort("created_at", -1))
+    # Fetch new reviews stored in session
+    session_reviews = session.get("new_reviews", [])
 
-    if not reviews:
-        return render_template("profile.html", user={"name": username, "age": "Unknown", "location": "Unknown"}, reviews=[])
+    # Combine session-stored reviews with database-stored reviews
+    all_reviews = session_reviews + db_reviews
 
-    user = {
-        "name": username,
-        "age": "Unknown",
-        "location": "Unknown"
-    }
-
-    print(f"✅ Rendering profile.html with {len(reviews)} reviews")
-
-    return render_template("profile.html", user=user, reviews=reviews)
+    return render_template("profile.html", user=session["user"], reviews=all_reviews)
 
 
+@app.route("/base")
+def base():
+    return render_template("base.html")
 
 
 @app.route("/add-review", methods=["GET"])
@@ -124,62 +131,48 @@ def add_review_form():
 
 @app.route("/add-review", methods=["POST"])
 def add_review():
-    if request.method == "POST":
-        # Extract form data
-        user = request.form.get("user")  # User's name
-        restaurant_name = request.form.get("restaurant_name", "").strip().lower()  # Normalize name
-        review_text = request.form.get("review_text")
-        cuisine = request.form.get("cuisine", "").strip()
+    if "user" not in session:
+        return redirect("/login")  # Ensure user is logged in
 
-        # Validate rating and convert safely
-        try:
-            rating = int(request.form.get("rating", 0))
-            if rating < 1 or rating > 5:
-                return "Rating must be between 1 and 5", 400
-        except ValueError:
-            return "Invalid rating format", 400
+    user = session["user"]["name"]  # Get logged-in username
+    restaurant_name = request.form.get("restaurant_name", "").strip().lower()
+    review_text = request.form.get("review_text")
+    cuisine = request.form.get("cuisine", "").strip()
 
-        # Validation checks
-        if not restaurant_name or not user:
-            return "Please provide both a restaurant name and your name", 400
+    # Validate rating
+    try:
+        rating = int(request.form.get("rating", 0))
+        if rating < 1 or rating > 5:
+            return "Rating must be between 1 and 5", 400
+    except ValueError:
+        return "Invalid rating format", 400
 
-        # Create the review object
-        new_review = {
-            "user": user,
-            "restaurant_name": restaurant_name,
-            "rating": rating,
-            "review_text": review_text,
-            "cuisine": cuisine if cuisine else None,
-            "created_at": datetime.datetime.now(),
-        }
+    if not restaurant_name or not review_text:
+        return "Please provide both a restaurant name and your review", 400
 
-        # Insert review into the reviews collection
-        reviews_collection.insert_one(new_review)
+    # Create review object
+    new_review = {
+        "user": user,
+        "restaurant_name": restaurant_name,
+        "rating": rating,
+        "review_text": review_text,
+        "cuisine": cuisine if cuisine else None,
+        "created_at": datetime.datetime.now(),
+    }
 
-        # Check if the restaurant exists (case-insensitive search)
-        existing_restaurant = restaurants_collection.find_one({"name": restaurant_name})
+    # Insert review into the database and get its ObjectId
+    inserted_review = reviews_collection.insert_one(new_review)
+    new_review["_id"] = str(inserted_review.inserted_id)  # Convert ObjectId to string
 
-        if existing_restaurant:
-            # Append the new review to the existing restaurant
-            restaurants_collection.update_one(
-                {"name": restaurant_name},
-                {
-                    "$push": {"reviews": new_review},
-                    "$set": {"cuisine": cuisine} if cuisine else {}
-                }
-            )
-        else:
-            # Create new restaurant entry with initial review
-            new_restaurant = {
-                "name": restaurant_name,
-                "rating": float(rating),
-                "cuisine": cuisine if cuisine else "Not specified",
-                "reviews": [new_review],
-                "created_at": datetime.datetime.now(),
-            }
-            restaurants_collection.insert_one(new_restaurant)
+    # Store the new review in session
+    if "new_reviews" not in session:
+        session["new_reviews"] = []
+    
+    session["new_reviews"].append(new_review)  # Now safe to store
 
-        return redirect(url_for("index"))
+    return redirect(url_for("profile"))
+
+
 
 
 @app.route("/restaurant/<restaurant_name>")
@@ -268,26 +261,24 @@ def login():
 
 @app.route('/login', methods=['POST'])
 def login_post():
-    print("in login post")
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        user = {
-            "email": email,
-            "password": password
-        }
-        user_data = users_collection.find_one(user)
-        print(user_data)
-        if user_data == None:
-            flag, username = False, ""
-        else:
-            flag, username = True, user_data["name"]
 
-    if(flag):
-        #print(username + "logged in")
-        return redirect("/profile?username=" + username)
-    else:
-        return redirect('/login')
+        # Check if user exists in database
+        user_data = users_collection.find_one({"email": email, "password": password})
+
+        if user_data is None:
+            return redirect('/login')  # Redirect back to login on failure
+        
+        # Store user information in session
+        session['user'] = {
+            "name": user_data["name"],  # Store the name of the user
+            "email": user_data["email"]
+        }
+
+        return redirect('/profile')  # Redirect to the profile page
+
 
 @app.route('/signup')
 def signup():
@@ -318,7 +309,9 @@ def signup_post():
 
 @app.route('/logout')
 def logout():
-    return 'Logout'
+    session.clear()  # Clear all session data
+    return redirect('/login')  # Redirect to login page
+
 
 # ✅ Start Flask Application
 if __name__ == "__main__":
